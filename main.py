@@ -10,11 +10,11 @@ import matplotlib.pyplot as plt
 from quad_tree_grid_search import QuadTreeGridSearch
 
 # Prepare data
-X, y = load_breast_cancer(return_X_y=True)
-X = StandardScaler().fit_transform(X)
+x, y = load_breast_cancer(return_X_y=True)
+x = StandardScaler().fit_transform(x)
 
-X_train, X_test, y_train, y_test = train_test_split(
-  X, y, test_size=0.2, random_state=42
+x_train, x_test, y_train, y_test = train_test_split(
+  x, y, test_size=0.2, random_state=42
 )
 
 # Initialize and run quad tree grid search
@@ -28,15 +28,15 @@ qtgs = QuadTreeGridSearch(
 )
 
 # Fit and get best parameters
-qtgs.fit(X, y)
+qtgs.fit(x, y)
 best_params = qtgs.get_best_params()
 print('Best parameters:', best_params)
 
 svc = SVC(C=best_params['C'], gamma=best_params['gamma'], kernel='rbf', random_state=42)
 
-svc.fit(X_train, y_train)
+svc.fit(x_train, y_train)
 
-y_pred = svc.predict(X_test)
+y_pred = svc.predict(x_test)
 
 # Print classification report
 print('\nClassification Report:')
@@ -44,7 +44,7 @@ print(classification_report(y_test, y_pred, target_names=['Malignant', 'Benign']
 
 # Number of support vectors
 print('\nNumber of support vectors:', svc.n_support_)
-print('Support vector ratio:', sum(svc.n_support_) / len(X_train))
+print('Support vector ratio:', sum(svc.n_support_) / len(x_train))
 
 # Plot confusion matrix
 cm = confusion_matrix(y_test, y_pred)
@@ -66,5 +66,5 @@ plt.show()
 
 # Additional model insights
 print('\nModel Insights:')
-print(f'Training set score: {svc.score(X_train, y_train):.3f}')
-print(f'Test set score: {svc.score(X_test, y_test):.3f}')
+print(f'Training set score: {svc.score(x_train, y_train):.3f}')
+print(f'Test set score: {svc.score(x_test, y_test):.3f}')

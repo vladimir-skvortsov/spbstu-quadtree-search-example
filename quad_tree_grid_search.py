@@ -1,7 +1,6 @@
 import numpy as np
 from sklearn.svm import SVC
 from sklearn.model_selection import cross_val_score
-import math
 
 
 class QuadNode:
@@ -33,8 +32,7 @@ class QuadTreeGridSearch:
     self.best_params = None
     self.best_score = 0
 
-  def _evaluate_node(self, node, X, y):
-    """Evaluate SVM performance at node vertices"""
+  def _evaluate_node(self, node, x, y):
     C_min, C_max, g_min, g_max = node.bounds
     vertices = [(C_min, g_min), (C_min, g_max), (C_max, g_min), (C_max, g_max)]
 
@@ -48,12 +46,12 @@ class QuadTreeGridSearch:
 
       # Train SVM
       svm = SVC(C=C_actual, gamma=gamma_actual, kernel='rbf')
-      cv_scores = cross_val_score(svm, X, y, cv=self.cv)
+      cv_scores = cross_val_score(svm, x, y, cv=self.cv)
       mean_score = np.mean(cv_scores)
 
       # Fit to get number of support vectors
-      svm.fit(X, y)
-      sv_ratio = len(svm.support_) / len(X)
+      svm.fit(x, y)
+      sv_ratio = len(svm.support_) / len(x)
 
       scores.append(mean_score)
       sv_ratios.append(sv_ratio)
@@ -66,7 +64,6 @@ class QuadTreeGridSearch:
     return scores, sv_ratios
 
   def _should_split(self, scores, sv_ratios):
-    """Determine if node should be split based on evaluation criteria"""
     all_good = all(
       score >= self.min_cv_score and sv <= self.max_sv_ratio
       for score, sv in zip(scores, sv_ratios)
@@ -95,7 +92,7 @@ class QuadTreeGridSearch:
       child = QuadNode(bounds, node.level + 1)
       node.children.append(child)
 
-  def fit(self, X, y):
+  def fit(self, x, y):
     """Main fitting method"""
     # Create root node
     root = QuadNode(
@@ -116,7 +113,7 @@ class QuadTreeGridSearch:
         continue
 
       # Evaluate node
-      scores, sv_ratios = self._evaluate_node(node, X, y)
+      scores, sv_ratios = self._evaluate_node(node, x, y)
 
       # Determine if node should be split
       if self._should_split(scores, sv_ratios):
